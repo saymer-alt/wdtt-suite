@@ -176,12 +176,23 @@ func handleAdminCreatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newPass := ""
+	rngFailed := false
 	for i := 0; i < 10; i++ {
-		candidate := generatePassword()
+		candidate, err := generatePassword()
+		if err != nil {
+			// RNG недоступен: пароль не выдаём, повтор бессмыслен.
+			rngFailed = true
+			break
+		}
 		if _, exists := db.Passwords[candidate]; !exists {
 			newPass = candidate
 			break
 		}
+	}
+	if rngFailed {
+		dbMutex.Unlock()
+		writeAdminError(w, http.StatusInternalServerError, "crypto/rand unavailable; password not generated")
+		return
 	}
 	if newPass == "" {
 		dbMutex.Unlock()
