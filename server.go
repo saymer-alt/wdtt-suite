@@ -182,20 +182,22 @@ const (
 	maxGeneratedPasswords = 10
 )
 
-func generatePassword() string {
-	b := make([]byte, generatedPasswordLen)
-	randomBytes := make([]byte, len(b))
-	if _, err := rand.Read(randomBytes); err != nil {
-		now := time.Now().UnixNano()
-		for i := range b {
-			b[i] = passChars[int(now+int64(i))%len(passChars)]
-		}
-		return string(b)
+// randRead — точка подмены в тестах; в работе это crypto/rand.Read.
+var randRead = rand.Read
+
+// generatePassword выдаёт пароль только из криптографического источника.
+// При отказе RNG пароль НЕ создаётся (fail closed): никаких fallback на
+// время или другие предсказуемые последовательности (issue #33).
+func generatePassword() (string, error) {
+	randomBytes := make([]byte, generatedPasswordLen)
+	if _, err := randRead(randomBytes); err != nil {
+		return "", fmt.Errorf("crypto/rand недоступен: %w", err)
 	}
+	b := make([]byte, len(randomBytes))
 	for i, raw := range randomBytes {
 		b[i] = passChars[int(raw)%len(passChars)]
 	}
-	return string(b)
+	return string(b), nil
 }
 
 func passwordEntryLabel(entry *PasswordEntry, pass string, index int) string {
@@ -989,12 +991,23 @@ func botLoop(token string, adminIDstr string, wgDev *device.Device) {
 					continue
 				}
 				newPass := ""
+				rngFailed := false
 				for i := 0; i < 10; i++ {
-					candidate := generatePassword()
+					candidate, err := generatePassword()
+					if err != nil {
+						// RNG недоступен: пароль не выдаём, повтор бессмыслен.
+						rngFailed = true
+						break
+					}
 					if _, exists := db.Passwords[candidate]; !exists {
 						newPass = candidate
 						break
 					}
+				}
+				if rngFailed {
+					dbMutex.Unlock()
+					sendTelegram(token, adminID, "❌ Криптографический генератор недоступен, пароль не создан. Повторите /new позже.", nil)
+					continue
 				}
 				if newPass == "" {
 					dbMutex.Unlock()
