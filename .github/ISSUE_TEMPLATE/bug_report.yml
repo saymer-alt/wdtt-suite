@@ -1,0 +1,51 @@
+name: "Ошибка / Bug report"
+description: "Сообщить о воспроизводимой ошибке"
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Перед отправкой:** не прикладывайте пароли, закрытые ключи, токены, подписки, VPN-ключи, приватные IP-конфигурации (реальные WDTT-ключи, подписки, адреса серверов). Логи и диагностику предварительно обезличивайте. Уязвимости не публикуйте в открытом Issue — используйте приватный канал из [SECURITY.md](../../blob/main/SECURITY.md).
+  - type: textarea
+    id: description
+    attributes:
+      label: "Что происходит?"
+      description: "Ожидаемое поведение и фактическое поведение."
+      placeholder: "Ожидалось ...; фактически ..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Действия для воспроизведения"
+      description: "Минимальные шаги без секретов."
+    validations:
+      required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: "Версия"
+      description: "Версия приложения, скрипта или конкретный коммит."
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Окружение"
+      description: "Компонент (Android-клиент / Keenetic SOCKS5-клиент / WDTT-сервер), версия, PR или коммит, модель роутера и Entware (для Keenetic), версия Android (для клиента)."
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: "Диагностика и логи"
+      description: "Обезличенные логи, отчёты, скриншоты — только необходимое."
+    validations:
+      required: false
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: "Безопасность"
+      options:
+        - label: "Я удалил(а) из отчёта пароли, токены, ключи, подписки и приватные адреса."
+          required: true

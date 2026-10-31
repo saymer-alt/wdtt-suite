@@ -92,3 +92,12 @@ scripts/          Android-сборка
 **Лицензия:** [GPL-3.0](LICENSE). Оговорки и лицензии сторонних компонентов должны сохраняться при распространении сборок.
 
 > **Новое название утверждено владельцем 21.10.2026: WDTT Suite**, фактический адрес репозитория — `saymer-alt/wdtt-suite`. Техническое переименование GitHub выполнено 21.10.2026 (Issue #38): Issues, PR, Releases, теги и история сохранены, старый адрес `saymer-alt/proxy-turn-vk-android` продолжает работать через автоматический redirect GitHub, включая скачивание релизных файлов. Старые ссылки на опубликованный PR34 prerelease сохранены как историческая точка входа.
+
+## Ошибки, предложения и обратная связь
+
+- **Ошибка** — [форма Bug report](https://github.com/saymer-alt/wdtt-suite/issues/new?template=bug_report.yml)
+- **Предложение** — [форма Feature request](https://github.com/saymer-alt/wdtt-suite/issues/new?template=feature_request.yml)
+- **Свободный вопрос** — [обычный Issue без шаблона](https://github.com/saymer-alt/wdtt-suite/issues/new)
+- **Уязвимость** — только приватно через [Report a vulnerability](https://github.com/saymer-alt/wdtt-suite/security/advisories/new); не публикуйте технические детали в Issues.
+
+Перед публикацией обезличивайте материалы: без паролей, токенов, закрытых ключей, подписок, VPN-ключей и приватных IP-конфигураций.

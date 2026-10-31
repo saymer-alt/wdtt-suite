@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "Уязвимость (приватно)"
+    url: https://github.com/saymer-alt/wdtt-suite/security/advisories/new
+    about: "Приватное сообщение об уязвимости — не создавайте публичный Issue."
