@@ -2,6 +2,8 @@ module wg-turn-client
 
 go 1.26.0
 
+toolchain go1.26.10
+
 require (
 	github.com/pion/dtls/v3 v3.1.4
 	github.com/pion/transport/v4 v4.0.1
