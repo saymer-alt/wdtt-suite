@@ -3,7 +3,7 @@ module wg-turn-client
 go 1.25.0
 
 require (
-	github.com/pion/dtls/v3 v3.1.2
+	github.com/pion/dtls/v3 v3.1.4
 	github.com/pion/transport/v4 v4.0.1
 	golang.org/x/crypto v0.51.0
 	golang.zx2c4.com/wireguard v0.0.0-20250521234502-f333402bd9cb
