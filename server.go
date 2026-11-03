@@ -188,14 +188,24 @@ var randRead = rand.Read
 // generatePassword выдаёт пароль только из криптографического источника.
 // При отказе RNG пароль НЕ создаётся (fail closed): никаких fallback на
 // время или другие предсказуемые последовательности (issue #33).
+// Выборка несмещённая (issue #33, п.2): значения байтов >= 256-(256%55)
+// отбрасываются (rejection sampling), поэтому каждый символ алфавита из
+// 55 знаков имеет равную вероятность; наивный int(raw)%len(passChars)
+// давал лёгкий перекос в сторону первых символов алфавита.
 func generatePassword() (string, error) {
-	randomBytes := make([]byte, generatedPasswordLen)
-	if _, err := randRead(randomBytes); err != nil {
-		return "", fmt.Errorf("crypto/rand недоступен: %w", err)
-	}
-	b := make([]byte, len(randomBytes))
-	for i, raw := range randomBytes {
-		b[i] = passChars[int(raw)%len(passChars)]
+	max := 256 - (256 % len(passChars))
+	b := make([]byte, generatedPasswordLen)
+	var raw [1]byte
+	for i := 0; i < len(b); i++ {
+		for {
+			if _, err := randRead(raw[:]); err != nil {
+				return "", fmt.Errorf("crypto/rand недоступен: %w", err)
+			}
+			if int(raw[0]) < max {
+				break
+			}
+		}
+		b[i] = passChars[int(raw[0])%len(passChars)]
 	}
 	return string(b), nil
 }
