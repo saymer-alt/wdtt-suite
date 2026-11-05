@@ -282,29 +282,46 @@ func fdTargets() ([]string, bool) {
 }
 
 // checkNoFDLeak сравнивает множества целей fd до/после и называет новые.
+// Асинхронное закрытие последнего соединения может не успеть завершиться к
+// моменту проверки (CI: свежий socket оставался живым при PASSED-кворуме
+// горутин), поэтому множество целей опрашивается с ограниченным бюджетом:
+// настоящая утечка держит fd вечно и по-прежнему проваливает тест, а
+// закрывающийся сокет лишь откладывает PASS, не превращаясь в FAIL.
 func checkNoFDLeak(t *testing.T, phase string, baseline []string, haveBaseline bool) {
 	t.Helper()
 	if !haveBaseline {
 		return
 	}
-	now, ok := fdTargets()
-	if !ok {
-		return
-	}
-	base := make(map[string]bool, len(baseline))
-	for _, s := range baseline {
-		base[s] = true
-	}
+	const settleBudget = 5 * time.Second
+	deadline := time.Now().Add(settleBudget)
+	var now []string
 	var fresh []string
-	for _, s := range now {
-		if !base[s] {
-			fresh = append(fresh, s)
+	for {
+		var ok bool
+		now, ok = fdTargets()
+		if !ok {
+			return
 		}
+		base := make(map[string]bool, len(baseline))
+		for _, s := range baseline {
+			base[s] = true
+		}
+		fresh = fresh[:0]
+		for _, s := range now {
+			if !base[s] {
+				fresh = append(fresh, s)
+			}
+		}
+		if len(fresh) == 0 {
+			return
+		}
+		if time.Now().After(deadline) {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
-	if len(fresh) > 0 {
-		t.Fatalf("утечка дескрипторов (%s): новые цели %v (baseline %d дескрипторов, стало %d)",
-			phase, fresh, len(baseline), len(now))
-	}
+	t.Fatalf("утечка дескрипторов (%s): новые цели %v (baseline %d дескрипторов, стало %d) — не закрылись за %v",
+		phase, fresh, len(baseline), len(now), settleBudget)
 }
 
 func waitForGoroutineQuiesce(t *testing.T, baseline int) {
